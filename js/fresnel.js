@@ -6,7 +6,7 @@ var debug = {
     max: false,
 };
 
-debug.on = (function() {
+debug.on = (function () {
     for (key in debug) {
         if (typeof debug[key] == 'boolean') {
             debug[key] = true;
@@ -14,7 +14,7 @@ debug.on = (function() {
     }
 });
 
-debug.off = (function() {
+debug.off = (function () {
     for (key in debug) {
         if (typeof debug[key] == 'boolean') {
             debug[key] = false;
@@ -112,7 +112,9 @@ function lightBeams() {
         var found = false,
             p3,
             p4,
-            result = {distance: Infinity};
+            result = {
+                distance: Infinity
+            };
         for (currentSegment = 1; currentSegment < lens.sections.length; currentSegment++) {
             p3 = lens.sections[currentSegment - 1];
             p4 = lens.sections[currentSegment];
@@ -148,13 +150,13 @@ function lightBeams() {
     ctx.stroke();
 }
 
-function refractBroken(angle, surfaceAngle, ior1, ior2, logit=false) {
+function refractBroken(angle, surfaceAngle, ior1, ior2, logit = false) {
     angle = normalize(angle);
     var normal = normalize(surfaceAngle - Math.PI / 2);
     if (normal > Math.PI) {
         normal -= Math.PI;
     }
-    if (Math.abs(normal - angle) < Math.PI / 2 && angle > Math.PI / 2 && angle < Math.PI /2 * 3) {
+    if (Math.abs(normal - angle) < Math.PI / 2 && angle > Math.PI / 2 && angle < Math.PI / 2 * 3) {
         logAngle(normal, "problem")
     }
     var angleA;
@@ -163,7 +165,11 @@ function refractBroken(angle, surfaceAngle, ior1, ior2, logit=false) {
     } else {
         angleA = angle - normal;
     }
-    if (logit) {logAngle(normal, 'normal'); logAngle(angleA, 'A'); logAngle(angle, 'orig')}
+    if (logit) {
+        logAngle(normal, 'normal');
+        logAngle(angleA, 'A');
+        logAngle(angle, 'orig')
+    }
     return normal - Math.asin(ior1 / ior2 * Math.sin(angleA));
 }
 
@@ -175,7 +181,7 @@ function refract(angle, surfaceAngle, ior1, ior2) {
 
 function refract2(angle1, angle2, ior1, ior2) {
     var difference = angle1 - angle2 - Math.PI;
-    var offset = - Math.atan(Math.sin(difference) / (ior1 / ior2 - Math.cos(difference)))
+    var offset = -Math.atan(Math.sin(difference) / (ior1 / ior2 - Math.cos(difference)))
     return angle1 + offset - Math.PI / 2;
 }
 
@@ -183,9 +189,13 @@ function normalize(angle) {
     return (angle + 2 * Math.PI) % (2 * Math.PI);
 }
 
-function logAngle(angle, name="") {
+function logAngle(angle, name = "") {
     angle = normalize(angle);
-    console.log({rad: angle, deg: angle * 180 / Math.PI, name: name});
+    console.log({
+        rad: angle,
+        deg: angle * 180 / Math.PI,
+        name: name
+    });
 }
 
 function computeLens() {
@@ -230,8 +240,22 @@ function computeLens() {
         ctx.stroke();
     }
     var max = lens.sections.length;
-    var p1 = {x: maxX, y: top - 1}, p2 = {x: maxX, y: top + lens.height + 1};
-    var p3 = {x: lensBase, y: top - 1}, p4 = {x: lensBase, y: top + lens.height + 1};
+    var p1 = {
+            x: maxX,
+            y: top - 1
+        },
+        p2 = {
+            x: maxX,
+            y: top + lens.height + 1
+        };
+    var p3 = {
+            x: lensBase,
+            y: top - 1
+        },
+        p4 = {
+            x: lensBase,
+            y: top + lens.height + 1
+        };
     for (i = 0; i < max; i++) {
         lens.sections[i].x = previous.x - lens.sections[i].x * ratio;
         previous.x = lens.sections[i].x;
@@ -292,6 +316,7 @@ function computeOffset() {
 var followMouse = false;
 var redrawLock = false;
 var killLoop = false;
+
 function redraw() {
     if (!redrawLock) {
         redrawLock = true;

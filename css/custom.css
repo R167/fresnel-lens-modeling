@@ -1,13 +1,11 @@
 input {
   width: 100%;
 }
-
 .heading {
   width: 100%;
   text-align: center;
   text-transform: capitalize;
 }
-
 #controls {
   padding-top: 10px;
 }

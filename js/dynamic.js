@@ -1,4 +1,4 @@
-(function($) {
+(function ($) {
     $(window).resize(fixCanvas);
 
     function fixCanvas() {
@@ -19,7 +19,7 @@
 
     fixCanvas();
 
-    $('.slider').change(function() {
+    $('.slider').change(function () {
         var slider = $(this);
         var id = slider.attr('id');
         var counter = $('#' + id + '-count');
