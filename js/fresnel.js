@@ -290,25 +290,41 @@ function computeOffset() {
 }
 
 var followMouse = false;
+var redrawLock = false;
+var killLoop = false;
+function redraw() {
+    if (!redrawLock) {
+        redrawLock = true;
+        computeOffset();
+        clearCanvas();
+        computeLens();
+        drawLens();
+        lightBeams();
+        lightSource();
+        redrawLock = false;
+    }
+}
 
 function controlMouse(button) {
     followMouse = !followMouse;
     if (followMouse) {
         button.value = 'following';
+        killLoop = false;
+        loop();
     } else {
         button.value = 'not following';
+        killLoop = true;
     }
 }
 
-function redraw() {
-    computeOffset();
-    clearCanvas();
-    computeLens();
-    drawLens();
-    lightBeams();
-    lightSource();
-    var divisor = followMouse ? 20 : 1;
-    setTimeout(redraw, 1000 / divisor);
+function loop() {
+    redraw();
+    if (killLoop) {
+        killLoop = false;
+    } else {
+        var divisor = followMouse ? 20 : 1;
+        setTimeout(loop, 1000 / divisor);
+    }
 }
 
 function setXY(event) {
@@ -320,5 +336,3 @@ function setXY(event) {
         }
     }
 }
-
-redraw();
