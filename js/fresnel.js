@@ -26,8 +26,8 @@ var offset = 0;
 var light = {
     x: 350,
     y: 300,
-    radius: 7,
-    beams: 3
+    radius: 10,
+    beams: 15
 };
 
 var lens = {
@@ -36,7 +36,7 @@ var lens = {
     distance: 150,
     height: 500,
     width: 10,
-    divisions: 3,
+    divisions: 4,
     segments: 100,
     ior: 1.512,
     sections: [],
@@ -87,7 +87,6 @@ function drawLens() {
 function lightBeams() {
     var division = (lens.height - 2 * offset) / light.beams;
     var top = lens.y - lens.height / 2 + division / 2 + offset;
-    var currentSegment = 1;
     ctx.beginPath();
     for (distance = 0; distance < light.beams; distance++) {
         var x = lens.x + lens.distance,
@@ -102,7 +101,6 @@ function lightBeams() {
             ctx.moveTo(x, y);
         }
         newAngle = refract(angle, Math.PI / 2, 1, lens.ior);
-        var backup = currentSegment;
         var p1 = {
             x: x,
             y: y
@@ -114,16 +112,20 @@ function lightBeams() {
         var found = false,
             p3,
             p4,
-            result;
-        while (currentSegment < lens.sections.length && !found) {
+            result = {distance: Infinity};
+        for (currentSegment = 1; currentSegment < lens.sections.length; currentSegment++) {
             p3 = lens.sections[currentSegment - 1];
             p4 = lens.sections[currentSegment];
-            found = doLineSegmentsIntersect(p1, p2, p3, p4);
-            currentSegment++;
+            newResult = checkLineIntersection(p1, p2, p3, p4);
+            if (newResult.onLine1 && newResult.onLine2) {
+                found = true;
+                newResult.distance = pointDistance(p1, newResult);
+                if (newResult.distance < result.distance) {
+                    result = newResult;
+                }
+            }
         }
-        currentSegment--;
         if (found) {
-            var result = checkLineIntersection(p1, p2, p3, p4);
             ctx.lineTo(result.x, result.y);
             if (debug.normal) {
                 var normal = -Math.atan((p4.y - p3.y) / (p4.x - p3.x)) + Math.PI / 2;
@@ -141,7 +143,6 @@ function lightBeams() {
         } else {
             //ctx.lineTo(p2.x, p2.y);
             console.log("FAILED TO INTERSECT!");
-            currentSegment = backup;
         }
     }
     ctx.stroke();

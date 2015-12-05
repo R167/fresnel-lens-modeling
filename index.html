@@ -1,12 +1,22 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <!-- <script type="text/javascript" src="//code.jquery.com/jquery-2.1.4.min.js"></script> -->
-  <script type="text/javascript" src="line-segments-intersect.js"></script>
+  <link rel="stylesheet" href="css/bootstrap.min.css">
+  <script type="text/javascript" src="js/jquery-2.1.4.min.js"></script>
+  <script type="text/javascript" src="js/line-segments-intersect.js"></script>
+  <script type="text/javascript" src="js/bootstrap.min.js"></script>
 </head>
 <body>
-  <canvas id="main_canvas" height="600px" width="1000px" style="border-style: solid;border-width: 1px;" onmousemove="setXY(event)"></canvas>
-  <input type="button" value="not following" id="button1" onclick="controlMouse(this)" />
-  <script type="text/javascript" src="fresnel.js"></script>
+  <div class="container">
+    <div class="row">
+      <div class="col-lg-10" id="canvas_container">
+        <canvas id="main_canvas" height="600px" width="1000px" style="border-style: solid;border-width: 1px;" onmousemove="setXY(event)"></canvas>
+      </div>
+      <div class="col-lg-2">
+        <input type="button" value="not following" id="button1" onclick="controlMouse(this)" />
+      </div>
+    </div>
+  </div>
+  <script type="text/javascript" src="js/fresnel.js"></script>
 </body>
 </html>

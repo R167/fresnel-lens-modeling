@@ -119,3 +119,7 @@ function checkLineIntersection(line1Start, line1End, line2Start, line2End) {
 
     return result;
 };
+
+function pointDistance(p1, p2) {
+    return Math.sqrt(Math.pow(p1.x - p2.x, 2) + Math.pow(p1.y - p2.y, 2));
+}
