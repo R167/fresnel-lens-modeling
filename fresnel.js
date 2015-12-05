@@ -1,18 +1,39 @@
 var canvas = document.getElementById("main_canvas");
 var ctx = canvas.getContext("2d");
-var debug = false;
+var debug = {
+    normal: false,
+    trace: false,
+    max: false,
+};
+
+debug.on = (function() {
+    for (key in debug) {
+        if (typeof debug[key] == 'boolean') {
+            debug[key] = true;
+        }
+    }
+});
+
+debug.off = (function() {
+    for (key in debug) {
+        if (typeof debug[key] == 'boolean') {
+            debug[key] = false;
+        }
+    }
+});
+
 var offset = 0;
 var light = {
-    x: 450,
+    x: 350,
     y: 300,
     radius: 7,
-    beams: 16
+    beams: 3
 };
 
 var lens = {
     x: light.x,
     y: light.y,
-    distance: 50,
+    distance: 150,
     height: 500,
     width: 10,
     divisions: 3,
@@ -43,14 +64,17 @@ function drawLens() {
     ctx.lineTo(lens.x + lens.distance + lens.width, lens.y - lens.height / 2);
     for (coords in lens.sections) {
         ctx.lineTo(lens.sections[coords].x, lens.sections[coords].y);
-        if (debug) {
+        if (debug.trace) {
             ctx.lineTo(lens.x + lens.distance, lens.sections[coords].y);
             ctx.moveTo(lens.sections[coords].x, lens.sections[coords].y);
         }
     }
     ctx.closePath();
+    ctx.fillStyle = "#efefef";
+    ctx.fill();
+    ctx.lineStyle = "#000000";
     ctx.stroke();
-    if (debug) {
+    if (debug.trace) {
         for (coords in lens.sections) {
             ctx.beginPath();
             ctx.fillStyle = 'red';
@@ -71,6 +95,12 @@ function lightBeams() {
             angle = Math.atan((y - light.y) / (x - light.x));
         ctx.moveTo(light.x, light.y);
         ctx.lineTo(x, y);
+        if (debug.normal) {
+            var normal = 0;
+            ctx.moveTo(x - 20, y)
+            ctx.lineTo(x + 20, y)
+            ctx.moveTo(x, y);
+        }
         newAngle = refract(angle, Math.PI / 2, 1, lens.ior);
         var backup = currentSegment;
         var p1 = {
@@ -82,16 +112,32 @@ function lightBeams() {
             y: Math.sin(-newAngle) * 1500 + y
         };
         var found = false,
+            p3,
+            p4,
             result;
         while (currentSegment < lens.sections.length && !found) {
-            found = doLineSegmentsIntersect(p1, p2, lens.sections[currentSegment - 1], lens.sections[currentSegment]);
+            p3 = lens.sections[currentSegment - 1];
+            p4 = lens.sections[currentSegment];
+            found = doLineSegmentsIntersect(p1, p2, p3, p4);
             currentSegment++;
         }
         currentSegment--;
         if (found) {
-            var result = checkLineIntersection(p1, p2, lens.sections[currentSegment - 1], lens.sections[currentSegment])
-            ctx.lineTo(result.x, result.y)
-            ctx.lineTo(1000, result.y)
+            var result = checkLineIntersection(p1, p2, p3, p4);
+            ctx.lineTo(result.x, result.y);
+            if (debug.normal) {
+                var normal = -Math.atan((p4.y - p3.y) / (p4.x - p3.x)) + Math.PI / 2;
+                ctx.moveTo(result.x - Math.cos(normal) * 20, result.y + Math.sin(normal) * 20)
+                ctx.lineTo(result.x + Math.cos(normal) * 20, result.y - Math.sin(normal) * 20)
+                ctx.moveTo(result.x, result.y);
+            }
+            /*
+            var farAngle = refract(newAngle, -Math.atan((p4.y - p3.y) / (p4.x - p3.x)), lens.ior, 1, distance == 0);
+            if (distance == 0) {
+                logAngle(farAngle);
+            }
+            ctx.lineTo(Math.cos(farAngle) * 1500 + result.x, -Math.sin(farAngle) * 1500 + result.y); */
+            ctx.lineTo(1500, result.y)
         } else {
             //ctx.lineTo(p2.x, p2.y);
             console.log("FAILED TO INTERSECT!");
@@ -101,24 +147,23 @@ function lightBeams() {
     ctx.stroke();
 }
 
-// broken
-function lightBeamsRadial() {
-    var top = lens.y - lens.height / 2;
-    var upper = Math.atan((light.y - top) / (lens.x + lens.distance - light.x));
-    var lower = Math.atan((top + lens.height - light.y) / (lens.x + lens.distance - light.x));
-    var division = (upper + lower) / light.beams;
-    ctx.beginPath();
-    for (distance = 0; distance < light.beams; distance++) {
-        var x = lens.x + lens.distance,
-            y = top + lens.height / 2 + (x - light.x) * Math.tan(division * distance - upper),
-            angle = Math.atan((y - light.y) / (x - light.x));
-        console.log(y);
-        ctx.moveTo(light.x, light.y);
-        ctx.lineTo(x, y);
-        newAngle = refract(angle, Math.PI / 2, 1, lens.ior);
-        ctx.lineTo(Math.cos(newAngle) * 150 + x, Math.sin(-newAngle) * 150 + y);
+function refractBroken(angle, surfaceAngle, ior1, ior2, logit=false) {
+    angle = normalize(angle);
+    var normal = normalize(surfaceAngle - Math.PI / 2);
+    if (normal > Math.PI) {
+        normal -= Math.PI;
     }
-    ctx.stroke();
+    if (Math.abs(normal - angle) < Math.PI / 2 && angle > Math.PI / 2 && angle < Math.PI /2 * 3) {
+        logAngle(normal, "problem")
+    }
+    var angleA;
+    if (normal > angle && normal <= angle + Math.PI) {
+        angleA = normal - angle;
+    } else {
+        angleA = angle - normal;
+    }
+    if (logit) {logAngle(normal, 'normal'); logAngle(angleA, 'A'); logAngle(angle, 'orig')}
+    return normal - Math.asin(ior1 / ior2 * Math.sin(angleA));
 }
 
 function refract(angle, surfaceAngle, ior1, ior2) {
@@ -131,6 +176,15 @@ function refract2(angle1, angle2, ior1, ior2) {
     var difference = angle1 - angle2 - Math.PI;
     var offset = - Math.atan(Math.sin(difference) / (ior1 / ior2 - Math.cos(difference)))
     return angle1 + offset - Math.PI / 2;
+}
+
+function normalize(angle) {
+    return (angle + 2 * Math.PI) % (2 * Math.PI);
+}
+
+function logAngle(angle, name="") {
+    angle = normalize(angle);
+    console.log({rad: angle, deg: angle * 180 / Math.PI, name: name});
 }
 
 function computeLens() {
@@ -168,34 +222,54 @@ function computeLens() {
         y: top
     };
     var maxX = bust / lens.divisions + lensBase;
-    if (debug) {
+    if (debug.max) {
         ctx.beginPath();
         ctx.moveTo(maxX, 0);
-        ctx.lineTo(maxX, 600);
+        ctx.lineTo(maxX, 1000);
         ctx.stroke();
     }
     var max = lens.sections.length;
+    var p1 = {x: maxX, y: top - 1}, p2 = {x: maxX, y: top + lens.height + 1};
+    var p3 = {x: lensBase, y: top - 1}, p4 = {x: lensBase, y: top + lens.height + 1};
     for (i = 0; i < max; i++) {
         lens.sections[i].x = previous.x - lens.sections[i].x * ratio;
         previous.x = lens.sections[i].x;
         lens.sections[i].y = previous.y + lens.sections[i].y * ratio;
         previous.y = lens.sections[i].y;
-        if (previous.x > maxX + 0.1) {
+        if (previous.x > maxX + 0.00000001 && i != 0) {
+            var result = checkLineIntersection(lens.sections[i - 1], lens.sections[i], p1, p2)
+            lens.sections[i].x = result.x;
+            lens.sections[i].y = result.y;
             max++;
             i++;
             lens.sections.splice(i, 0, {
                 x: lensBase,
+                y: result.y
+            });
+            max++;
+            i++;
+            lens.sections.splice(i, 0, {
+                x: previous.x - result.x + lensBase,
                 y: previous.y
             });
-            previous.x = lensBase;
-        } else if (previous.x < lensBase - 0.1) {
+            previous.x = previous.x - result.x + lensBase;
+        } else if (previous.x < lensBase && i != max - 1) {
+            var result = checkLineIntersection(lens.sections[i - 1], lens.sections[i], p3, p4)
+            lens.sections[i].x = result.x;
+            lens.sections[i].y = result.y;
             max++;
             i++;
             lens.sections.splice(i, 0, {
                 x: maxX,
+                y: result.y
+            });
+            max++;
+            i++;
+            lens.sections.splice(i, 0, {
+                x: maxX + previous.x - result.x,
                 y: previous.y
             });
-            previous.x = maxX;
+            previous.x = maxX + previous.x - result.x;
         }
     }
 }
