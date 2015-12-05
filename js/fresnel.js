@@ -113,7 +113,9 @@ function lightBeams() {
             p3,
             p4,
             result = {
-                distance: Infinity
+                distance: Infinity,
+                p3: undefined,
+                p4: undefined
             };
         for (currentSegment = 1; currentSegment < lens.sections.length; currentSegment++) {
             p3 = lens.sections[currentSegment - 1];
@@ -124,13 +126,15 @@ function lightBeams() {
                 newResult.distance = pointDistance(p1, newResult);
                 if (newResult.distance < result.distance) {
                     result = newResult;
+                    result.p3 = p3;
+                    result.p4 = p4;
                 }
             }
         }
         if (found) {
             ctx.lineTo(result.x, result.y);
             if (debug.normal) {
-                var normal = -Math.atan((p4.y - p3.y) / (p4.x - p3.x)) + Math.PI / 2;
+                var normal = -Math.atan((result.p4.y - result.p3.y) / (result.p4.x - result.p3.x)) + Math.PI / 2;
                 ctx.moveTo(result.x - Math.cos(normal) * 20, result.y + Math.sin(normal) * 20)
                 ctx.lineTo(result.x + Math.cos(normal) * 20, result.y - Math.sin(normal) * 20)
                 ctx.moveTo(result.x, result.y);
