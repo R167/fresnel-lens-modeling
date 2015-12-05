@@ -150,7 +150,7 @@ function lightBeams() {
     ctx.stroke();
 }
 
-function refractBroken(angle, surfaceAngle, ior1, ior2, logit = false) {
+function refractBroken(angle, surfaceAngle, ior1, ior2) {
     angle = normalize(angle);
     var normal = normalize(surfaceAngle - Math.PI / 2);
     if (normal > Math.PI) {
@@ -164,11 +164,6 @@ function refractBroken(angle, surfaceAngle, ior1, ior2, logit = false) {
         angleA = normal - angle;
     } else {
         angleA = angle - normal;
-    }
-    if (logit) {
-        logAngle(normal, 'normal');
-        logAngle(angleA, 'A');
-        logAngle(angle, 'orig')
     }
     return normal - Math.asin(ior1 / ior2 * Math.sin(angleA));
 }
@@ -189,7 +184,7 @@ function normalize(angle) {
     return (angle + 2 * Math.PI) % (2 * Math.PI);
 }
 
-function logAngle(angle, name = "") {
+function logAngle(angle, name) {
     angle = normalize(angle);
     console.log({
         rad: angle,
