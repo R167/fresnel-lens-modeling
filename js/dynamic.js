@@ -17,6 +17,27 @@
         redraw();
     }
 
+    function forceBounds(id, min, max) {
+        var slider = $('#' + id);
+        var counter = $('#' + id + '-count');
+        if (!!min) {
+            if (parseInt(slider.val()) < min) {
+                slider.val(min);
+                counter.text(id + ': ' + min);
+                lens[id] = min;
+            }
+            slider.attr('min', min);
+        }
+        if (!!max) {
+            if (!!max && parseInt(slider.val()) > max) {
+                slider.val(max);
+                counter.text(id + ': ' + max);
+                lens[id] = max;
+            }
+            slider.attr('max', max);
+        }
+    }
+
     fixCanvas();
 
     $('.slider').change(function () {
@@ -31,6 +52,14 @@
         }
 
         counter.text(id + ': ' + slider.val());
+
+        switch (id) {
+        case 'divisions':
+            forceBounds('segments', parseInt(slider.val()) * 5);
+            break;
+        default:
+        }
+
         redraw();
     })
 })(jQuery);
