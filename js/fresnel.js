@@ -84,7 +84,15 @@ function drawLens() {
     }
 }
 
+function drawFollowArea() {
+    if (followMouse) {
+        ctx.fillStyle = "rgba(195, 48, 48, 0.41)";
+        ctx.fillRect(0, lens.y - lens.height / 4, lens.x + lens.distance, lens.height / 2);
+    }
+}
+
 function lightBeams() {
+    ctx.lineStyle = "#000000";
     var division = (lens.height - 2 * offset) / light.beams;
     var top = lens.y - lens.height / 2 + division / 2 + offset;
     ctx.beginPath();
@@ -321,6 +329,7 @@ function redraw() {
         redrawLock = true;
         computeOffset();
         clearCanvas();
+        drawFollowArea();
         computeLens();
         drawLens();
         lightBeams();
@@ -332,11 +341,11 @@ function redraw() {
 function controlMouse(button) {
     followMouse = !followMouse;
     if (followMouse) {
-        button.value = 'following';
+        button.value = 'Following (try the red)';
         killLoop = false;
         loop();
     } else {
-        button.value = 'not following';
+        button.value = 'Not following';
         killLoop = true;
     }
 }
@@ -355,7 +364,8 @@ function setXY(event) {
     if (followMouse) {
         var rect = canvas.getBoundingClientRect();
         var newX = (event.clientX - rect.left) / (rect.right - rect.left) * canvas.width;
-        if (newX < lens.x + lens.distance) {
+        var newY = (event.clientY - rect.top) / (rect.bottom - rect.top) * canvas.height;
+        if (newX < lens.x + lens.distance - 20 && newY > lens.y - lens.height / 4 && newY < lens.y + lens.height / 4) {
             light.x = newX;
         }
     }
