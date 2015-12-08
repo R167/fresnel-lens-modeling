@@ -44,14 +44,17 @@
         var slider = $(this);
         var id = slider.attr('id');
         var counter = $('#' + id + '-count');
+        var text = id;
+        var matchData = id.match(/beams-(\w+)/);
 
-        if (id == 'beams') {
-            light.beams = parseInt(slider.val());
+        if (matchData) {
+            light.beams[matchData[1]] = parseInt(slider.val());
+            text = 'Beam ' + matchData[1];
         } else {
             lens[id] = parseInt(slider.val());
         }
 
-        counter.text(id + ': ' + slider.val());
+        counter.text(text + ': ' + slider.val());
 
         switch (id) {
         case 'divisions':

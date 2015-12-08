@@ -27,7 +27,12 @@ var light = {
     x: 350,
     y: 300,
     radius: 10,
-    beams: 15
+    beams: {
+        count: 15,
+        gap: 20,
+        span: 20,
+        delta: 10,
+    }
 };
 
 var lens = {
@@ -93,10 +98,10 @@ function drawFollowArea() {
 
 function lightBeams() {
     ctx.lineStyle = "#000000";
-    var division = (lens.height - 2 * offset) / light.beams;
+    var division = (lens.height - 2 * offset) / light.beams.count;
     var top = lens.y - lens.height / 2 + division / 2 + offset;
     ctx.beginPath();
-    for (distance = 0; distance < light.beams; distance++) {
+    for (distance = 0; distance < light.beams.count; distance++) {
         var x = lens.x + lens.distance,
             y = top + division * distance,
             angle = Math.atan((y - light.y) / (x - light.x));
@@ -306,6 +311,16 @@ function computeLens() {
     }
 }
 
+var marchOffset = 0;
+
+function march(lineFunction) {
+    ctx.setLineDash([light.beams.span, light.beams.gap]);
+    marchOffset = (marchOffset + light.beams.delta / 10.0) % (light.beams.span + light.beams.gap)
+    ctx.lineDashOffset = -marchOffset;
+    lineFunction.call();
+    ctx.setLineDash([]);
+}
+
 function computeOffset() {
     var top = lens.y - lens.height / 2;
     for (i = 0; i < lens.height / 2; i += 0.1) {
@@ -323,6 +338,7 @@ function computeOffset() {
 var followMouse = false;
 var redrawLock = false;
 var killLoop = false;
+var lineDash = false;
 
 function redraw() {
     if (!redrawLock) {
@@ -332,7 +348,11 @@ function redraw() {
         drawFollowArea();
         computeLens();
         drawLens();
-        lightBeams();
+        if (lineDash) {
+            march(lightBeams);
+        } else {
+            lightBeams();
+        }
         lightSource();
         redrawLock = false;
     }
@@ -340,13 +360,31 @@ function redraw() {
 
 function controlMouse(button) {
     followMouse = !followMouse;
+    redraw();
     if (followMouse) {
         button.value = 'Following (try the red)';
         killLoop = false;
-        loop();
+        if (!lineDash) {
+            loop();
+        }
     } else {
-        button.value = 'Not following';
-        killLoop = true;
+        button.value = 'Not Following';
+        killLoop = !lineDash;
+    }
+}
+
+function controlMarch(button) {
+    lineDash = !lineDash;
+    redraw();
+    if (lineDash) {
+        button.value = 'Moving';
+        killLoop = false;
+        if (!followMouse) {
+            loop();
+        }
+    } else {
+        button.value = 'Not Moving';
+        killLoop = !followMouse;
     }
 }
 
@@ -355,8 +393,7 @@ function loop() {
     if (killLoop) {
         killLoop = false;
     } else {
-        var divisor = followMouse ? 20 : 1;
-        setTimeout(loop, 1000 / divisor);
+        setTimeout(loop, 1000 / 20.0);
     }
 }
 

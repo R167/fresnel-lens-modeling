@@ -25,9 +25,6 @@
         <h5 class="heading" id="segments-count">Segments: 100</h5>
         <input type="range" id="segments" class="slider" min="10" max="500" value="100" />
 
-        <h5 class="heading" id="beams-count">Beams: 15</h5>
-        <input type="range" id="beams" class="slider" min="3" max="100" value="15" />
-
         <h5 class="heading" id="width-count">Width: 5</h5>
         <input type="range" id="width" class="slider" min="1" max="100" value="5" />
 
@@ -36,7 +33,25 @@
 
         <hr>
 
-        <input type="button" value="Not following" id="follow" onclick="controlMouse(this)" class="btn btn-primary" />
+        <input type="button" value="Not Following" id="follow" onclick="controlMouse(this)" class="btn btn-primary" />
+
+        <hr>
+
+        <h5 class="heading" id="beams-count-count">Beam Count: 15</h5>
+        <input type="range" id="beams-count" class="slider" min="3" max="100" value="15" />
+
+        <h5 class="heading" id="beams-span-count">Beam Span: 20</h5>
+        <input type="range" id="beams-span" class="slider" min="3" max="100" value="20" />
+
+        <h5 class="heading" id="beams-gap-count">Beam Gap: 20</h5>
+        <input type="range" id="beams-gap" class="slider" min="3" max="100" value="20" />
+
+        <h5 class="heading" id="beams-delta-count">Beam Delta: 10</h5>
+        <input type="range" id="beams-delta" class="slider" min="1" max="50" value="10" />
+
+        <hr>
+
+        <input type="button" value="Not Moving" id="lineDash" onclick="controlMarch(this)" class="btn btn-primary" />
       </div>
     </div>
   </div>
