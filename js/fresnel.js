@@ -152,12 +152,11 @@ function lightBeams() {
                 ctx.lineTo(result.x + Math.cos(normal) * 20, result.y - Math.sin(normal) * 20)
                 ctx.moveTo(result.x, result.y);
             }
-            /*
-            var farAngle = refract(newAngle, -Math.atan((p4.y - p3.y) / (p4.x - p3.x)), lens.ior, 1, distance == 0);
-            if (distance == 0) {
-                logAngle(farAngle);
-            }
-            ctx.lineTo(Math.cos(farAngle) * 1500 + result.x, -Math.sin(farAngle) * 1500 + result.y); */
+            // var farAngle = refract(newAngle, -Math.atan((p4.y - p3.y) / (p4.x - p3.x)), lens.ior, 1, distance == 0);
+            // if (distance == 0) {
+            //     logAngle(farAngle);
+            // }
+            // ctx.lineTo(Math.cos(farAngle) * 1500 + result.x, -Math.sin(farAngle) * 1500 + result.y);
             ctx.lineTo(1500, result.y)
         } else {
             //ctx.lineTo(p2.x, p2.y);
