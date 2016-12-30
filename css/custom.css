@@ -6,6 +6,11 @@ input {
   text-align: center;
   text-transform: capitalize;
 }
+
 #controls {
-  padding-top: 10px;
+  padding-bottom: 10px;
+  height: 100%;
+  overflow-y: scroll;
+  position: fixed;
+  right: 0;
 }
